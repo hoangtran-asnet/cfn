@@ -9,7 +9,7 @@ phases:
   pre_build:
     commands:
       - echo "Validating CFN templates"
-      - aws cloudformation validate-template --template-body file://demo.yml
+      # - aws cloudformation validate-template --template-body file://demo.yml
         # for cfn_template in $(find . -name "*.yaml"); do
           # echo "Validating CloudFormation template file $cfn_template"
           # aws cloudformation validate-template --template-body file://$cfn_template
