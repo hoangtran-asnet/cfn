@@ -1,0 +1,48 @@
+version: 0.1
+
+phases:
+  install:
+    commands:
+      - apt-get update -y
+      # - apt-get install -y npm
+      # - npm install -g jsonlint
+  pre_build:
+    commands:
+      - echo "Validating CFN templates"
+      - |
+        for cfn_template in $(find . -name "*.yaml"); do
+          echo "Validating CloudFormation template file $cfn_template"
+          aws cloudformation validate-template --template-body file://$cfn_template
+        done
+      # - |
+      #   for cfn_template_conf in $(find . -name "*.json"); do
+      #     echo "Validating CFN parameters config file $cfn_template_conf"
+      #     jsonlint -q $cfn_template_conf
+      #   done
+  build:
+    commands:
+      - |
+        for dir in $(ls -d code/*/*); do
+          echo "Installing requirements"
+          pip install -r $dir/requirements.txt -t $dir
+        done
+      - |
+        touch ~/.bashrc && chmod +x ~/.bashrc
+        curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.5/install.sh | bash
+        . ~/.bashrc
+        nvm install 6.10
+        . ~/.bashrc
+        pwd=$PWD
+        for dir in $(ls -d code/*/*); do
+          if [ -e $dir/package.json ] ; then
+          cd $dir
+          echo "Installing requirements"
+          npm install
+          echo "Run Test"
+          npm test
+          find ./node_modules -mtime +10950 -exec touch {} \;
+          cd $pwd
+          fi
+        done
+      - echo "Packaging templates to S3"
+      - aws cloudformation package --template-file demo.yaml --s3-bucket $S3Bucket --s3-prefix codebuild --output-template-file test.yaml
