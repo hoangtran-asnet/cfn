@@ -45,4 +45,4 @@ phases:
       #     fi
       #   done
       - echo "Packaging templates to S3"
-      - aws cloudformation package --template-file demo.yaml --s3-bucket "awscodepipeline-demobucket-example-20190304" --s3-prefix codebuild --output-template-file test.yaml
+      - aws cloudformation package --template-file demo.yaml --s3-bucket awscodepipeline-demobucket-example-20190304 --s3-prefix codebuild --output-template-file test.yaml
